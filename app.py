@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import pickle
 import os
 
-# Set page configurations
+# Page configuration
 st.set_page_config(
     page_title="App User Behavior Segmentation Dashboard",
     page_icon="📊",
@@ -14,10 +14,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for rich aesthetics and premium styling
+# Custom dashboard theme styling
 st.markdown("""
 <style>
-    /* Gradient Background for headers */
+    /* Header styling with blue gradient */
     .main-header {
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         padding: 20px;
@@ -39,7 +39,7 @@ st.markdown("""
         opacity: 0.9;
     }
     
-    /* Metrics Card styling */
+    /* Metrics panel card styling */
     .metric-card {
         background-color: #f8f9fa;
         border-radius: 8px;
@@ -61,7 +61,7 @@ st.markdown("""
         margin-top: 5px;
     }
     
-    /* Persona Card styling */
+    /* Segment profiling card styling */
     .persona-card {
         background-color: #ffffff;
         border-radius: 10px;
@@ -79,58 +79,58 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Cache data loading
+# Load clustered/PCA data
 @st.cache_data
 def load_data():
     if os.path.exists("user_data_with_pca.csv"):
         return pd.read_csv("user_data_with_pca.csv")
     else:
-        # Fallback to loading original if clustering not completed
+        # Fallback to base dataset if clustering pipeline hasn't run
         return pd.read_csv("user_behavior_dataset.csv")
 
 df = load_data()
 
-# Define cluster mapping
+# Define cluster persona definitions
 cluster_personas = {
     0: {
         "name": "🔇 Silent Users (Non-Raters)",
-        "color": "#440154",  # Viridis dark purple
+        "color": "#440154",
         "desc": "Users who use the app normally but have not provided any ratings (ratings are recorded as 0). They represent a silent group whose satisfaction remains unmeasured.",
         "actions": "Launch targeted push notification or in-app surveys to collect feedback. Offer small rewards or feature unlocks for submitting a rating.",
         "badge": "warning"
     },
     1: {
         "name": "🧭 Active Explorers (High Page Views)",
-        "color": "#31688e",  # Viridis blue-grey
+        "color": "#31688e",
         "desc": "Users who click through a very high volume of pages per session (averaging 19.3 pages). They are actively exploring multiple features and search tools.",
         "actions": "Suggest personalized feature shortcuts. Promote related content recommendations. Serve in-app advertisements and contextual premium upgrades.",
         "badge": "info"
     },
     2: {
         "name": "⚡ Focused Browsers (Low Page Views)",
-        "color": "#35b779",  # Viridis green
+        "color": "#35b779",
         "desc": "Users who visit the minimum number of pages per session (averaging 7.7 pages). They log in with a specific task in mind and log out immediately.",
         "actions": "Keep the dashboard interface clean and high-performance. Avoid cluttering their path with promotional banners. Offer quick-action widgets.",
         "badge": "success"
     },
     3: {
         "name": "🧘 Immersive Users (Long Session Duration)",
-        "color": "#fde725",  # Viridis yellow
+        "color": "#fde725",
         "desc": "Users who spend the longest continuous time in the app per session (averaging 29.1 minutes) while viewing a normal number of pages. They read or interact deeply.",
         "actions": "Promote Premium Subscription tiers. Implement loyalty programs. Send long-form content notifications. Highlight community or social share features.",
         "badge": "error"
     }
 }
 
-# App Title Header
+# App header
 st.markdown("""
 <div class="main-header">
     <h1>App User Behavior Segmentation Dashboard</h1>
-    <p>Unsupervised Machine Learning & PCA Segmentations (k=4)</p>
+    <p>User Clustering & PCA Segmentations (k=4)</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar Navigation
+# Sidebar panel
 st.sidebar.image("https://img.icons8.com/color/96/000000/activity-feed-value.png", width=70)
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
@@ -138,19 +138,18 @@ page = st.sidebar.radio(
     ["📊 Dashboard Overview", "🧬 Segment Visualization (PCA)", "🎯 Targeting & Export"]
 )
 
-# Sidebar Info Box
 st.sidebar.markdown("---")
-st.sidebar.markdown("### Model Configuration")
+st.sidebar.markdown("### Model Properties")
 st.sidebar.markdown("**Algorithm**: K-Means Clustering")
 st.sidebar.markdown("**Input Features**: 10 Behavioral Columns")
-st.sidebar.markdown("**Optimal Clusters ($k$)**: 4")
+st.sidebar.markdown("**Optimal Clusters (k)**: 4")
 st.sidebar.markdown("**Variance Explained (PCA)**: 20.36%")
 
-# PAGE 1: DASHBOARD OVERVIEW
+# PAGE 1: OVERVIEW DASHBOARD
 if page == "📊 Dashboard Overview":
     st.header("Overall User Base Stats")
     
-    # 4 Column KPI Section
+    # Key performance indicators
     kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
     with kpi_col1:
         st.markdown("""
@@ -201,14 +200,14 @@ if page == "📊 Dashboard Overview":
             hole=0.4
         )
         fig_pie.update_layout(margin=dict(t=20, b=20, l=20, r=20), legend=dict(orientation="h", y=-0.1))
-        st.plotly_chart(fig_pie, width='stretch')
+        st.plotly_chart(fig_pie, use_container_width=True)
         
     with col2:
         st.subheader("Behavioral Performance Matrix")
         
-        # Average metrics per cluster
+        # Profile cluster mean scores
         means = df.groupby('cluster')[['engagement_score', 'churn_risk_score']].mean().reset_index()
-        means['churn_risk_score'] = means['churn_risk_score'] * 100  # convert to %
+        means['churn_risk_score'] = means['churn_risk_score'] * 100
         means['Segment Name'] = means['cluster'].map(lambda x: cluster_personas[x]['name'])
         
         fig_bar = go.Figure()
@@ -231,18 +230,18 @@ if page == "📊 Dashboard Overview":
             margin=dict(t=20, b=20, l=20, r=20),
             legend=dict(orientation="h", y=-0.1)
         )
-        st.plotly_chart(fig_bar, width='stretch')
+        st.plotly_chart(fig_bar, use_container_width=True)
 
-# PAGE 2: SEGMENT VISUALIZATION (PCA)
+# PAGE 2: PCA VISUALIZATION
 elif page == "🧬 Segment Visualization (PCA)":
     st.header("Dimensionality Reduction & Cluster Separation")
     
     st.markdown("""
-    This scatter plot shows the users projected from **10 behavioral dimensions** down to a 2D space using **Principal Component Analysis (PCA)**. 
-    Hover over the points to see details. Note that since we have 50,000 points, we display a random sample of 2,000 points to keep the visualization fast and responsive.
+    This scatter plot shows the user base projected from the **10 behavioral dimensions** down to 2D space using **Principal Component Analysis (PCA)**. 
+    Hover over individual points to inspect. We show a random sample of 2,000 points here to keep the visualization responsive.
     """)
     
-    # Sample data for fast plotting
+    # Sample subset for speed
     df_sample = df.sample(2000, random_state=42)
     df_sample['Segment Name'] = df_sample['cluster'].map(lambda x: cluster_personas[x]['name'])
     
@@ -272,9 +271,9 @@ elif page == "🧬 Segment Visualization (PCA)":
         legend=dict(orientation="h", y=-0.1),
         margin=dict(t=40, b=20, l=20, r=20)
     )
-    st.plotly_chart(fig_pca, width='stretch')
+    st.plotly_chart(fig_pca, use_container_width=True)
 
-    # Statistical Comparison Expander
+    # Segment median breakdown
     with st.expander("📊 Compare Statistical Medians per Segment"):
         cols = [
             'sessions_per_week', 'avg_session_duration_min', 'daily_active_minutes', 
@@ -283,40 +282,37 @@ elif page == "🧬 Segment Visualization (PCA)":
         ]
         medians = df[cols].groupby('cluster').median()
         medians.index = medians.index.map(lambda x: cluster_personas[x]['name'])
-        st.dataframe(medians, width='stretch')
+        st.dataframe(medians, use_container_width=True)
 
 # PAGE 3: TARGETING & EXPORT
 elif page == "🎯 Targeting & Export":
-    st.header("Targeted Segment Analysis & Campaign Export")
+    st.header("Segment Targeting & Export")
     
-    # 1. Segment Selector Card
     selected_cluster_id = st.selectbox(
-        "Select User Segment to Analyze:",
+        "Select User Segment to Target:",
         options=[0, 1, 2, 3],
         format_func=lambda x: cluster_personas[x]['name']
     )
     
     persona = cluster_personas[selected_cluster_id]
     
-    # Display Persona details in styled card
     st.markdown(f"""
     <div class="persona-card">
         <div class="persona-title">{persona['name']}</div>
-        <p><strong>Persona Description:</strong> {persona['desc']}</p>
-        <p style="margin-bottom:0;"><strong>💡 Recommended Business Strategy:</strong></p>
+        <p><strong>Description:</strong> {persona['desc']}</p>
+        <p style="margin-bottom:0;"><strong>💡 Business Strategy:</strong></p>
         <div style="background-color:#eef2f7; padding: 10px; border-left: 4px solid #2a5298; border-radius: 4px; margin-top:5px;">
             {persona['actions']}
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Filter dataset for download
+    # Filter for download
     df_segment = df[df['cluster'] == selected_cluster_id].drop(columns=['pca_1', 'pca_2'])
     
-    # Export options
     col_a, col_b = st.columns([1, 1])
     with col_a:
-        st.subheader(f"Total Users in Segment: {len(df_segment):,}")
+        st.subheader(f"Segment Count: {len(df_segment):,}")
         csv_data = df_segment.to_csv(index=False).encode('utf-8')
         st.download_button(
             label=f"📥 Download {persona['name']} List (CSV)",
@@ -326,17 +322,16 @@ elif page == "🎯 Targeting & Export":
             key='download-csv'
         )
     with col_b:
-        st.subheader("Segment Age & Subscription Tier Profiles")
-        # Quick summary stats
+        st.subheader("Demographics Summary")
         avg_age = df_segment['age'].mean()
         avg_acct = df_segment['account_age_days'].mean()
-        st.write(f"**Average User Age**: {avg_age:.1f} years old")
+        st.write(f"**Average User Age**: {avg_age:.1f} years")
         st.write(f"**Average Account Age**: {avg_acct:.0f} days (~{avg_acct/30.4:.1f} months)")
         
     st.markdown("---")
     
-    # 2. Individual User Lookup Tool
-    st.subheader("🔍 Individual User Lookup Tool")
+    # Single user lookup utility
+    st.subheader("🔍 Individual User Lookup")
     user_search = st.text_input("Enter User ID (e.g., 100000 to 149999):", value="")
     
     if user_search:
@@ -346,9 +341,8 @@ elif page == "🎯 Targeting & Export":
             
             if not user_row.empty:
                 assigned_cluster = user_row.iloc[0]['cluster']
-                st.success(f"User ID **{uid}** is classified in: **{cluster_personas[assigned_cluster]['name']}**")
+                st.success(f"User ID **{uid}** belongs to: **{cluster_personas[assigned_cluster]['name']}**")
                 
-                # Show key metrics in Columns
                 stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
                 with stat_col1:
                     st.metric("Engagement Score", f"{user_row.iloc[0]['engagement_score']:.2f}")
@@ -359,10 +353,9 @@ elif page == "🎯 Targeting & Export":
                 with stat_col4:
                     st.metric("Rating Given", f"{user_row.iloc[0]['rating_given']}")
                 
-                # Expand to show all details
-                with st.expander("View Full User Profile"):
-                    st.dataframe(user_row.drop(columns=['pca_1', 'pca_2']), width='stretch')
+                with st.expander("Show Details"):
+                    st.dataframe(user_row.drop(columns=['pca_1', 'pca_2']), use_container_width=True)
             else:
-                st.warning("User ID not found. Please enter a valid ID between 100000 and 149999.")
+                st.warning("User ID not found. Enter a valid ID between 100000 and 149999.")
         except ValueError:
-            st.error("Please enter a valid numeric User ID.")
+            st.error("Please enter a valid integer User ID.")
