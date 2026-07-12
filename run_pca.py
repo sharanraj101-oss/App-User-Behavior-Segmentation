@@ -13,28 +13,28 @@ print("Loading preprocessed dataset...")
 X_scaled = pd.read_csv("scaled_features.csv")
 df_clustered = pd.read_csv("user_data_with_clusters.csv")
 
-# Perform PCA to reduce behavior features to 2 dimensions
+# I run PCA to reduce behavioral features down to 2 dimensions
 print("Running Principal Component Analysis (PCA)...")
 pca = PCA(n_components=2, random_state=42)
 X_pca = pca.fit_transform(X_scaled)
 
-# Variance check
+# I calculate the explained variance of the components
 var_ratio = pca.explained_variance_ratio_
 print(f"Explained Variance: PC1={var_ratio[0]*100:.2f}%, PC2={var_ratio[1]*100:.2f}% (Combined={sum(var_ratio)*100:.2f}%)")
 
-# Save the trained PCA transformer
+# I save my trained PCA transformer
 with open("models/pca_model.pkl", "wb") as f:
     pickle.dump(pca, f)
 print("Saved PCA transformer to 'models/pca_model.pkl'")
 
-# Append PCA component scores to labeled dataset
+# I append the PCA component scores back to my labeled dataset
 df_clustered['pca_1'] = X_pca[:, 0]
 df_clustered['pca_2'] = X_pca[:, 1]
 
 df_clustered.to_csv("user_data_with_pca.csv", index=False)
 print("Saved dataset with PCA components to 'user_data_with_pca.csv'")
 
-# Visualize 2D PCA cluster space
+# I visualize the segments in 2D PCA cluster space
 print("Generating PCA scatter plot...")
 plt.figure(figsize=(12, 8))
 sns.scatterplot(

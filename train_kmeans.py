@@ -12,7 +12,7 @@ os.makedirs("plots", exist_ok=True)
 print("Loading scaled features dataset...")
 X_scaled = pd.read_csv("scaled_features.csv")
 
-# Determine optimal clusters via Elbow Method
+# I run the Elbow method to find the optimal k
 print("Running Elbow Method (k=1 to 10)...")
 wcss = []
 k_range = range(1, 11)
@@ -23,7 +23,7 @@ for k in k_range:
     wcss.append(kmeans.inertia_)
     print(f"k={k} | Inertia: {kmeans.inertia_:.2f}")
 
-# Plot elbow curve results
+# I plot my Elbow Curve analysis
 plt.figure(figsize=(10, 6))
 plt.plot(k_range, wcss, marker='o', linestyle='--', color='b')
 plt.title('Elbow Curve Analysis', fontsize=14)
@@ -36,17 +36,17 @@ plt.savefig("plots/elbow_curve.png", dpi=150)
 plt.close()
 print("Saved Elbow Curve plot to 'plots/elbow_curve.png'")
 
-# Train final K-Means model using k=4
+# I train my final K-Means model using k=4
 print("\nFitting final K-Means model (k=4)...")
 kmeans_final = KMeans(n_clusters=4, random_state=42, n_init=10)
 kmeans_final.fit(X_scaled)
 
-# Serialize the trained model
+# I serialize and save my trained model
 with open("models/kmeans_model.pkl", "wb") as f:
     pickle.dump(kmeans_final, f)
 print("Saved trained K-Means model to 'models/kmeans_model.pkl'")
 
-# Label the dataset with assigned clusters
+# I label my dataset with the cluster assignments
 print("Assigning cluster labels to cleaned user data...")
 df_cleaned = pd.read_csv("cleaned_user_data.csv")
 df_cleaned['cluster'] = kmeans_final.labels_

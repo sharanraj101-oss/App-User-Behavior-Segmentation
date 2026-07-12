@@ -6,16 +6,16 @@ def download_file_from_google_drive(file_id, destination):
     print(f"Starting download for file ID: {file_id}")
     url = "https://docs.google.com/uc?export=download"
     
-    # Send an initial request to check for virus scan warnings/confirmation page
+    # I send an initial request to check for virus scan warnings or confirmation page
     req_url = f"{url}&id={file_id}"
     try:
-        # Create a request with a standard user-agent to avoid being blocked
+        # I create a request with a standard user-agent to prevent getting blocked
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
         req = urllib.request.Request(req_url, headers=headers)
         
         with urllib.request.urlopen(req) as response:
             content = response.read()
-            # If the response is small, check if it's an HTML confirmation page
+            # If the response size is small, I check if it's an HTML confirmation page
             if len(content) < 100000:
                 html_text = content.decode('utf-8', errors='ignore')
                 match = re.search(r'confirm=([0-9A-Za-z_]+)', html_text)
@@ -28,14 +28,14 @@ def download_file_from_google_drive(file_id, destination):
             else:
                 download_url = req_url
         
-        # Download the file
+        # I download the actual file content
         print("Downloading file content...")
         req = urllib.request.Request(download_url, headers=headers)
         with urllib.request.urlopen(req) as response, open(destination, 'wb') as out_file:
-            # Buffer the read to show progress
+            # I buffer the read to display download progress
             total_size = int(response.headers.get('content-length', 0))
             bytes_downloaded = 0
-            block_size = 1024 * 64  # 64 KB
+            block_size = 1024 * 64  # 64 KB chunk size
             
             while True:
                 buffer = response.read(block_size)
@@ -52,7 +52,7 @@ def download_file_from_google_drive(file_id, destination):
             
     except Exception as e:
         print(f"\nError occurred: {e}")
-        # Fallback to direct urlretrieve
+        # Fallback to direct urlretrieve if my custom download fails
         print("Attempting fallback direct download...")
         try:
             urllib.request.urlretrieve(f"{url}&id={file_id}", destination)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     destination = "user_behavior_dataset.csv"
     download_file_from_google_drive(file_id, destination)
     
-    # Check if the file exists and display its size
+    # I verify if the file exists and print its size
     if os.path.exists(destination):
         size = os.path.getsize(destination)
         print(f"Successfully downloaded '{destination}' ({size / (1024*1024):.2f} MB)")

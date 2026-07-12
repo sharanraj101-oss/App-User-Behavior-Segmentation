@@ -1,6 +1,6 @@
 import pandas as pd
 
-# Load the dataset
+# Load my dataset
 df = pd.read_csv("user_behavior_dataset.csv")
 
 print("--- Dataset Shape ---")

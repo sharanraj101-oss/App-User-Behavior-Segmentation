@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import pickle
 import os
 
-# Page configuration
+# I configure the dashboard page settings
 st.set_page_config(
     page_title="App User Behavior Segmentation Dashboard",
     page_icon="📊",
@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom dashboard theme styling
+# My custom dashboard CSS theme styling
 st.markdown("""
 <style>
     /* Header styling with blue gradient */
@@ -79,18 +79,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Load clustered/PCA data
+# I load the clustered/PCA data
 @st.cache_data
 def load_data():
     if os.path.exists("user_data_with_pca.csv"):
         return pd.read_csv("user_data_with_pca.csv")
     else:
-        # Fallback to base dataset if clustering pipeline hasn't run
+        # Fallback to base dataset if my clustering pipeline hasn't run
         return pd.read_csv("user_behavior_dataset.csv")
 
 df = load_data()
 
-# Define cluster persona definitions
+# I define my cluster persona definitions
 cluster_personas = {
     0: {
         "name": "🔇 Silent Users (Non-Raters)",
@@ -122,7 +122,7 @@ cluster_personas = {
     }
 }
 
-# App header
+# Render my dashboard header
 st.markdown("""
 <div class="main-header">
     <h1>App User Behavior Segmentation Dashboard</h1>
@@ -130,7 +130,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar panel
+# Render my sidebar panel
 st.sidebar.image("https://img.icons8.com/color/96/000000/activity-feed-value.png", width=70)
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
@@ -145,11 +145,11 @@ st.sidebar.markdown("**Input Features**: 10 Behavioral Columns")
 st.sidebar.markdown("**Optimal Clusters (k)**: 4")
 st.sidebar.markdown("**Variance Explained (PCA)**: 20.36%")
 
-# PAGE 1: OVERVIEW DASHBOARD
+# PAGE 1: MY OVERVIEW DASHBOARD
 if page == "📊 Dashboard Overview":
     st.header("Overall User Base Stats")
     
-    # Key performance indicators
+    # My key performance indicators
     kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
     with kpi_col1:
         st.markdown("""
@@ -205,7 +205,7 @@ if page == "📊 Dashboard Overview":
     with col2:
         st.subheader("Behavioral Performance Matrix")
         
-        # Profile cluster mean scores
+        # I calculate profile cluster mean scores
         means = df.groupby('cluster')[['engagement_score', 'churn_risk_score']].mean().reset_index()
         means['churn_risk_score'] = means['churn_risk_score'] * 100
         means['Segment Name'] = means['cluster'].map(lambda x: cluster_personas[x]['name'])
@@ -232,7 +232,7 @@ if page == "📊 Dashboard Overview":
         )
         st.plotly_chart(fig_bar, use_container_width=True)
 
-# PAGE 2: PCA VISUALIZATION
+# PAGE 2: MY PCA VISUALIZATION
 elif page == "🧬 Segment Visualization (PCA)":
     st.header("Dimensionality Reduction & Cluster Separation")
     
@@ -241,7 +241,7 @@ elif page == "🧬 Segment Visualization (PCA)":
     Hover over individual points to inspect. We show a random sample of 2,000 points here to keep the visualization responsive.
     """)
     
-    # Sample subset for speed
+    # I sample a subset for visualization speed
     df_sample = df.sample(2000, random_state=42)
     df_sample['Segment Name'] = df_sample['cluster'].map(lambda x: cluster_personas[x]['name'])
     
@@ -273,7 +273,7 @@ elif page == "🧬 Segment Visualization (PCA)":
     )
     st.plotly_chart(fig_pca, use_container_width=True)
 
-    # Segment median breakdown
+    # My segment median statistical breakdown
     with st.expander("📊 Compare Statistical Medians per Segment"):
         cols = [
             'sessions_per_week', 'avg_session_duration_min', 'daily_active_minutes', 
@@ -284,7 +284,7 @@ elif page == "🧬 Segment Visualization (PCA)":
         medians.index = medians.index.map(lambda x: cluster_personas[x]['name'])
         st.dataframe(medians, use_container_width=True)
 
-# PAGE 3: TARGETING & EXPORT
+# PAGE 3: MY TARGETING & EXPORT
 elif page == "🎯 Targeting & Export":
     st.header("Segment Targeting & Export")
     
@@ -307,7 +307,7 @@ elif page == "🎯 Targeting & Export":
     </div>
     """, unsafe_allow_html=True)
     
-    # Filter for download
+    # I filter the dataframe for export
     df_segment = df[df['cluster'] == selected_cluster_id].drop(columns=['pca_1', 'pca_2'])
     
     col_a, col_b = st.columns([1, 1])
@@ -330,7 +330,7 @@ elif page == "🎯 Targeting & Export":
         
     st.markdown("---")
     
-    # Single user lookup utility
+    # My single user lookup tool
     st.subheader("🔍 Individual User Lookup")
     user_search = st.text_input("Enter User ID (e.g., 100000 to 149999):", value="")
     

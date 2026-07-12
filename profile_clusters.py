@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 
-# Load clustered dataset
+# I load my clustered dataset
 df = pd.read_csv("user_data_with_pca.csv")
 
-# Set display options to print all columns
+# I set pandas display options to print all columns
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 
-# Behavioral columns
+# My list of behavioral columns
 behavioral_cols = [
     'sessions_per_week', 
     'avg_session_duration_min', 
